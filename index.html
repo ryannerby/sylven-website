@@ -293,7 +293,6 @@
     flex-shrink: 0;
   }
   .tools-list .mark svg { width: 100%; height: 100%; display: block; }
-  .tools-list .mark img { width: 100%; height: 100%; display: block; object-fit: contain; }
 
   /* ========= SECTIONS ========= */
   section {
@@ -832,14 +831,18 @@
 <div class="tools-strip">
   <div class="tools-label">Built With</div>
   <div class="tools-list">
-    <span class="tool"><span class="mark"><img src="https://cdn.simpleicons.org/n8n" alt="n8n"></span>n8n</span>
-    <span class="tool"><span class="mark"><img src="https://cdn.simpleicons.org/make" alt="Make"></span>Make</span>
+    <!-- n8n: 4-node S-curve workflow graph -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 36 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 11 C10.5 11 11 4.5 14 4.5 C17 4.5 17.5 17.5 20.5 17.5 C23.5 17.5 24 11 26.5 11" /><circle cx="4.5" cy="11" r="3.5"/><circle cx="14" cy="4.5" r="3.5"/><circle cx="20.5" cy="17.5" r="3.5"/><circle cx="30" cy="11" r="3.5"/></svg></span>n8n</span>
+    <!-- Make: three tilted rectangles -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="7" width="5" height="13" rx="1.5" fill="currentColor" transform="rotate(-20 3.5 7)"/><rect x="9.5" y="5.5" width="5" height="13" rx="1.5" fill="currentColor" transform="rotate(-20 9.5 5.5)"/><rect x="15.5" y="4" width="5" height="13" rx="1.5" fill="currentColor" transform="rotate(-20 15.5 4)"/></svg></span>Make</span>
     <!-- Zapier: 8-pointed asterisk with rounded square hole -->
     <span class="tool"><span class="mark"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2 L13.6 9.2 L19.1 4.9 L14.8 10.4 L22 12 L14.8 13.6 L19.1 19.1 L13.6 14.8 L12 22 L10.4 14.8 L4.9 19.1 L9.2 13.6 L2 12 L9.2 10.4 L4.9 4.9 L10.4 9.2 Z"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.2" fill="#080808"/></svg></span>Zapier</span>
-    <span class="tool"><span class="mark"><img src="https://cdn.simpleicons.org/openai/ffffff" alt="OpenAI"></span>OpenAI</span>
+    <!-- OpenAI: 3 overlapping ellipses at 60° — woven knot -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" xmlns="http://www.w3.org/2000/svg"><g transform="translate(12,12)"><ellipse rx="3.6" ry="8.8"/><ellipse rx="3.6" ry="8.8" transform="rotate(60)"/><ellipse rx="3.6" ry="8.8" transform="rotate(120)"/></g></svg></span>OpenAI</span>
     <!-- Apify: two upward triangles + one downward forming W -->
     <span class="tool"><span class="mark"><svg viewBox="0 0 26 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><polygon points="1,19 7,5 13,19" opacity="0.6"/><polygon points="13,19 19,5 25,19" opacity="0.9"/><polygon points="7,19 13,8 19,19" opacity="1"/></svg></span>Apify</span>
-    <span class="tool"><span class="mark"><img src="https://cdn.simpleicons.org/anthropic" alt="Claude"></span>Claude</span>
+    <!-- Claude: thin multi-spoke asterisk -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><g transform="translate(12,12)"><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(0)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(30)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(60)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(90)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(120)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(150)"/></g></svg></span>Claude</span>
   </div>
 </div>
 
