@@ -1,0 +1,1408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sylven — Give your team their time back.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --surface: #0D0D0F;
+    --glass-bg: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.07);
+    --text: #F5F5F7;
+    --muted: #86868B;
+    --accent: #E8D5B0;
+    --orb: #C7A882;
+    --sans: 'Inter', -apple-system, system-ui, sans-serif;
+    --serif: 'Instrument Serif', 'Times New Roman', serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  body { overflow-x: hidden; cursor: none; line-height: 1.5; font-weight: 400; }
+  a { color: inherit; text-decoration: none; cursor: none; }
+  button { font-family: inherit; cursor: none; border: none; background: none; color: inherit; }
+
+  /* ========= GRAIN ========= */
+  .grain {
+    position: fixed; inset: 0; z-index: 9998;
+    pointer-events: none; opacity: 0.035; mix-blend-mode: overlay;
+  }
+
+  /* ========= ORBS ========= */
+  .orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .orb {
+    position: absolute; width: 900px; height: 900px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.12;
+    will-change: transform;
+  }
+  .orb-1 {
+    background: radial-gradient(circle, var(--orb) 0%, transparent 60%);
+    top: -200px; left: -200px;
+    animation: drift1 32s ease-in-out infinite alternate;
+  }
+  .orb-2 {
+    background: radial-gradient(circle, var(--orb) 0%, transparent 60%);
+    top: 40%; right: -300px;
+    width: 1100px; height: 1100px;
+    animation: drift2 36s ease-in-out infinite alternate;
+    opacity: 0.10;
+  }
+  .orb-3 {
+    background: radial-gradient(circle, var(--orb) 0%, transparent 60%);
+    bottom: -300px; left: 30%;
+    width: 1000px; height: 1000px;
+    animation: drift3 28s ease-in-out infinite alternate;
+    opacity: 0.11;
+  }
+  @keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(120px, 80px) scale(1.1); } }
+  @keyframes drift2 { from { transform: translate(0,0) scale(1.05); } to { transform: translate(-100px, -120px) scale(0.95); } }
+  @keyframes drift3 { from { transform: translate(0,0) scale(0.95); } to { transform: translate(80px, -100px) scale(1.08); } }
+
+  /* ========= CURSOR ========= */
+  .cursor-dot, .cursor-ring, .cursor-glow {
+    position: fixed; top: 0; left: 0; pointer-events: none;
+    z-index: 10000; will-change: transform;
+    transform: translate3d(-100px,-100px,0);
+  }
+  .cursor-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text); margin: -3px 0 0 -3px;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid rgba(232,213,176,0.4);
+    margin: -18px 0 0 -18px;
+    transition: width 0.25s ease, height 0.25s ease, margin 0.25s ease, border-color 0.25s ease;
+  }
+  .cursor-ring.hover {
+    width: 60px; height: 60px;
+    margin: -30px 0 0 -30px;
+    border-color: rgba(232,213,176,0.7);
+  }
+  .cursor-glow {
+    width: 260px; height: 260px;
+    margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,213,176,0.04) 0%, transparent 70%);
+    z-index: 9997;
+  }
+
+  /* ========= SCROLL BAR ========= */
+  .scroll-bar {
+    position: fixed; top: 0; left: 0;
+    height: 2px; width: 0%; z-index: 9999;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: 0 0 6px var(--accent);
+    pointer-events: none;
+    transition: width 0.05s linear;
+  }
+
+  /* ========= NAV ========= */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 24px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(8,8,8,0.4);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: var(--serif); font-size: 24px; font-style: italic;
+    letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-mark {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+
+  .nav-cta {
+    font-size: 13px; padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+    letter-spacing: 0.02em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-cta:hover {
+    border-color: rgba(232,213,176,0.4);
+    background: rgba(232,213,176,0.05);
+  }
+  .nav-cta::after {
+    content: '→'; transition: transform 0.3s ease;
+  }
+  .nav-cta:hover::after { transform: translateX(4px); }
+
+  /* ========= HERO ========= */
+  .hero {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 160px 48px 80px;
+    text-align: center;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 8px 18px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+  .eyebrow::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 8px var(--accent);
+  }
+
+  .hero-headline { position: relative; }
+  .hero-line-1 {
+    font-family: var(--sans); font-weight: 600;
+    font-size: clamp(40px, 6vw, 88px);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .hero-line-2 {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(80px, 14vw, 220px);
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    margin-top: 8px;
+    color: var(--text);
+    position: relative;
+  }
+
+  /* Chromatic aberration */
+  .ca-wrap { position: relative; display: inline-block; }
+  .ca-wrap::before, .ca-wrap::after {
+    content: attr(data-text);
+    position: absolute; inset: 0;
+    font-family: inherit; font-style: inherit; font-weight: inherit;
+    font-size: inherit; letter-spacing: inherit; line-height: inherit;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.12;
+    -webkit-text-fill-color: initial;
+  }
+  .ca-wrap::before { color: #ff3b3b; transform: translate(-1.5px, 0); }
+  .ca-wrap::after  { color: #00d8ff; transform: translate(1.5px, 0); }
+  .ca-wrap.jitter { animation: jitter 0.08s linear; }
+  @keyframes jitter { 0%,100% { transform: translate(0,0); } 50% { transform: translate(1px, -1px); } }
+
+  .hero-sub {
+    margin-top: 40px;
+    font-size: clamp(15px, 1.2vw, 18px);
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .hero-cta {
+    margin-top: 48px;
+    padding: 16px 28px;
+    background: var(--accent);
+    color: #0a0a0a;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    display: inline-flex; align-items: center; gap: 10px;
+    transition: all 0.3s cubic-bezier(.2,.7,.2,1);
+    box-shadow: 0 0 0 1px rgba(232,213,176,0.3), 0 8px 32px rgba(232,213,176,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .hero-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgba(232,213,176,0.5), 0 16px 48px rgba(232,213,176,0.25), inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .hero-cta .arrow {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(0,0,0,0.15);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    transition: transform 0.3s ease;
+  }
+  .hero-cta:hover .arrow { transform: translateX(4px); }
+
+  .hero-meta {
+    margin-top: 32px;
+    display: flex; gap: 24px; align-items: center;
+    font-size: 12px; color: var(--muted);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+  .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .hero-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+  /* ========= TOOLS STRIP ========= */
+  .tools-strip {
+    position: relative; z-index: 2;
+    padding: 80px 48px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .tools-label {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 32px;
+  }
+  .tools-list {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 12px; align-items: stretch;
+    max-width: 980px; margin: 0 auto;
+  }
+  .tools-list .tool {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 18px 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: rgba(255,255,255,0.02);
+    color: rgba(245,245,247,0.65);
+    font-size: 14px; letter-spacing: -0.005em;
+    transition: all 0.4s ease;
+  }
+  .tools-list .tool:hover {
+    color: var(--text);
+    border-color: rgba(232,213,176,0.3);
+    background: rgba(232,213,176,0.04);
+  }
+  .tools-list .mark {
+    width: 24px; height: 24px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .tools-list .mark svg { width: 100%; height: 100%; display: block; }
+
+  /* ========= SECTIONS ========= */
+  section {
+    position: relative; z-index: 2;
+    padding: 140px 48px;
+  }
+  .container {
+    max-width: 1280px; margin: 0 auto;
+  }
+
+  .section-eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 24px;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .section-eyebrow::before {
+    content: ''; width: 24px; height: 1px; background: var(--accent); opacity: 0.5;
+  }
+
+  .section-title {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(48px, 7vw, 96px);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .section-title-row {
+    display: flex; align-items: end; justify-content: space-between;
+    gap: 48px; margin-bottom: 80px;
+    flex-wrap: wrap;
+  }
+  .section-title-row .right {
+    color: var(--muted); font-size: 14px; max-width: 320px;
+    line-height: 1.6;
+  }
+
+  /* ========= FEATURE CARDS ========= */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 1024px) { .features-grid { grid-template-columns: 1fr; } }
+
+  .feature-card {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(48px) saturate(180%);
+    -webkit-backdrop-filter: blur(48px) saturate(180%);
+    padding: 0;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 0 80px rgba(199,168,130,0.05), 0 4px 24px rgba(0,0,0,0.4);
+    transition: transform 0.5s cubic-bezier(.2,.7,.2,1), border-color 0.4s ease;
+    transform-style: preserve-3d;
+    min-height: 520px;
+    display: flex; flex-direction: column;
+  }
+  .feature-card:hover {
+    border-color: rgba(232,213,176,0.18);
+  }
+  .feature-card .shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(232,213,176,0.08) 50%, transparent 70%);
+    background-size: 200% 100%;
+    background-position: 200% 0;
+    pointer-events: none;
+    border-radius: inherit;
+    transition: background-position 1.2s ease;
+  }
+  .feature-card:hover .shimmer {
+    background-position: -100% 0;
+  }
+
+  .card-canvas {
+    flex: 1;
+    min-height: 280px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at center, rgba(232,213,176,0.04), transparent 70%),
+      linear-gradient(180deg, rgba(0,0,0,0.2), transparent);
+  }
+  .card-body {
+    padding: 28px 28px 32px;
+  }
+  .card-meta {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-meta .live { color: var(--accent); display: inline-flex; align-items: center; gap: 6px; }
+  .card-meta .live::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 6px var(--accent);
+    animation: pulse 1.6s infinite;
+  }
+  .card-title {
+    font-family: var(--serif); font-style: italic;
+    font-size: 38px; letter-spacing: -0.02em; line-height: 1;
+    margin-bottom: 14px;
+  }
+  .card-desc {
+    font-size: 14px; color: var(--muted); line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  /* ---- Card 1: Audit Shuffler ---- */
+  .audit-stage {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .audit-frame {
+    position: relative;
+    width: 80%; max-width: 320px;
+    border: 1px solid rgba(232,213,176,0.18);
+    border-radius: 14px;
+    padding: 8px;
+    background: rgba(13,13,15,0.6);
+  }
+  .audit-frame::before, .audit-frame::after {
+    content: ''; position: absolute;
+    width: 10px; height: 10px;
+    border: 1px solid var(--accent); opacity: 0.6;
+  }
+  .audit-frame::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .audit-frame::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+  .audit-list {
+    position: relative; height: 200px; overflow: hidden;
+  }
+  .audit-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--text);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: all 0.5s ease;
+  }
+  .audit-row:last-child { border-bottom: none; }
+  .audit-row .hours {
+    color: var(--muted); font-size: 11px;
+  }
+  .audit-row.active {
+    color: var(--accent);
+    background: rgba(232,213,176,0.06);
+  }
+  .audit-row.active .hours { color: var(--accent); }
+  .audit-row .check {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-right: 12px;
+    font-size: 9px;
+    transition: all 0.4s;
+  }
+  .audit-row.active .check {
+    background: var(--accent); border-color: var(--accent); color: #0a0a0a;
+  }
+  .audit-row .left { display: flex; align-items: center; }
+  .audit-scanner {
+    position: absolute; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: 0 0 8px var(--accent);
+    pointer-events: none;
+    animation: scanner 4s linear infinite;
+  }
+  @keyframes scanner {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  /* ---- Card 2: Telemetry Typewriter ---- */
+  .term {
+    position: absolute; inset: 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(8,8,10,0.7);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted);
+  }
+  .term-bar {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.02);
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .term-bar .dots { display: flex; gap: 6px; }
+  .term-bar .dots span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .term-bar .dots span:last-child { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .term-body {
+    flex: 1; padding: 12px;
+    overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    gap: 6px;
+  }
+  .term-line {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text); opacity: 0.6;
+    line-height: 1.5;
+    white-space: nowrap; overflow: hidden;
+  }
+  .term-line .ts { color: var(--muted); opacity: 0.6; font-size: 10px; }
+  .term-line.fresh { color: var(--accent); opacity: 1; }
+  .term-line .caret {
+    display: inline-block; width: 7px; height: 12px;
+    background: var(--accent);
+    animation: blink 1s infinite step-end;
+    margin-left: 2px;
+    vertical-align: middle;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---- Card 3: Cursor Protocol Scheduler ---- */
+  .sched {
+    position: absolute; inset: 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(13,13,15,0.6);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .sched-bar {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .sched-bar .week {
+    color: var(--text);
+  }
+  .sched-grid {
+    flex: 1; padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: auto repeat(3, 1fr);
+    gap: 6px;
+    position: relative;
+  }
+  .sched-day {
+    font-family: var(--mono); font-size: 9px;
+    color: var(--muted); text-align: center;
+    letter-spacing: 0.1em;
+    padding-bottom: 4px;
+  }
+  .sched-cell {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.02);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .sched-cell.done {
+    background: rgba(232,213,176,0.12);
+    border-color: rgba(232,213,176,0.3);
+  }
+  .sched-cell.done::after {
+    content: '';
+    position: absolute; inset: 30%;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0.6;
+  }
+  .sched-cell.scanning {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px rgba(232,213,176,0.4), 0 0 12px rgba(232,213,176,0.2);
+  }
+  .sched-foot {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .sched-status {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .sched-status.ready { color: var(--accent); }
+  .sched-btn {
+    font-size: 11px;
+    padding: 8px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
+    transition: all 0.4s ease;
+    font-family: var(--sans);
+    letter-spacing: 0.02em;
+  }
+  .sched-btn.armed {
+    background: var(--accent);
+    color: #0a0a0a;
+    border-color: var(--accent);
+    box-shadow: 0 0 18px rgba(232,213,176,0.3);
+  }
+  .fake-cursor {
+    position: absolute;
+    width: 14px; height: 14px;
+    pointer-events: none;
+    z-index: 10;
+    transition: transform 1s cubic-bezier(.4,.2,.2,1), opacity 0.4s;
+    opacity: 0;
+  }
+  .fake-cursor svg { display: block; filter: drop-shadow(0 0 4px rgba(232,213,176,0.6)); }
+
+
+
+  /* ========= PROTOCOL (sticky stacking) ========= */
+  .protocol-section {
+    padding: 80px 48px 0;
+  }
+  .protocol-stack {
+    position: relative;
+  }
+  .stack-card {
+    position: sticky;
+    top: 80px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    background: var(--surface);
+    backdrop-filter: blur(40px);
+    overflow: hidden;
+    box-shadow: 0 0 80px rgba(199,168,130,0.06), 0 24px 80px rgba(0,0,0,0.6);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 520px;
+  }
+  @media (max-width: 900px) { .stack-card { grid-template-columns: 1fr; } }
+  .stack-content {
+    padding: 56px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .stack-step {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--muted); letter-spacing: 0.2em;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .stack-step .num {
+    font-family: var(--serif); font-style: italic; font-size: 56px;
+    color: var(--accent); letter-spacing: -0.03em; line-height: 1;
+  }
+  .stack-title {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(40px, 5vw, 64px);
+    letter-spacing: -0.02em; line-height: 1;
+    margin: 32px 0 24px;
+  }
+  .stack-desc {
+    font-size: 16px; color: var(--muted); line-height: 1.6;
+    max-width: 420px; text-wrap: pretty;
+  }
+  .stack-foot {
+    margin-top: 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;
+  }
+  .stack-foot .badge {
+    color: var(--accent);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .stack-foot .badge::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 8px var(--accent);
+  }
+  .stack-canvas {
+    position: relative;
+    border-left: 1px solid var(--border);
+    background:
+      radial-gradient(ellipse at center, rgba(232,213,176,0.05), transparent 60%),
+      linear-gradient(135deg, rgba(232,213,176,0.02), transparent);
+    overflow: hidden;
+  }
+  @media (max-width: 900px) {
+    .stack-canvas { border-left: none; border-top: 1px solid var(--border); min-height: 320px; }
+  }
+  .stack-canvas canvas { width: 100%; height: 100%; display: block; }
+
+  /* ========= BIG CTA ========= */
+  .big-cta {
+    padding: 200px 48px;
+    text-align: center;
+    position: relative;
+  }
+  .cta-prompt {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--accent); letter-spacing: 0.25em;
+    margin-bottom: 32px;
+    position: relative; z-index: 1;
+  }
+  .cta-caret {
+    display: inline-block; width: 8px; height: 14px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: blink 1s infinite step-end;
+  }
+  .cta-handoff {
+    margin-top: 56px;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--muted); letter-spacing: 0.3em;
+    position: relative; z-index: 1;
+  }
+  .big-cta::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(232,213,176,0.06), transparent 60%);
+    pointer-events: none;
+  }
+  .big-cta-title {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(56px, 9vw, 140px);
+    letter-spacing: -0.03em; line-height: 0.95;
+    margin-bottom: 32px;
+  }
+  .big-cta-sub {
+    color: var(--muted); font-size: 18px;
+    max-width: 480px; margin: 0 auto 48px;
+    line-height: 1.6; text-wrap: pretty;
+  }
+
+  /* ========= FOOTER ========= */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 80px 48px 40px;
+    position: relative; z-index: 2;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 48px;
+    max-width: 1280px; margin: 0 auto 60px;
+  }
+  @media (max-width: 720px) { .footer-grid { grid-template-columns: 1fr; } }
+  .footer-brand {
+    font-family: var(--serif); font-style: italic;
+    font-size: 56px; letter-spacing: -0.03em; line-height: 1;
+    margin-bottom: 16px;
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .footer-pulse {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 14px var(--accent);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .footer-tag {
+    color: var(--muted); font-size: 14px;
+    max-width: 320px; line-height: 1.6;
+  }
+  .footer-block h4 {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 16px; font-weight: 400;
+  }
+  .footer-block p { font-size: 13px; color: var(--text); margin-bottom: 6px; }
+  .footer-block .status {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--accent); font-size: 13px;
+  }
+  .footer-block .status::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  .footer-bottom {
+    max-width: 1280px; margin: 0 auto;
+    padding-top: 32px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); letter-spacing: 0.1em;
+  }
+
+  /* Reveal */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- Grain SVG -->
+<svg class="grain" xmlns="http://www.w3.org/2000/svg">
+  <filter id="grain-filter">
+    <feTurbulence id="grain-turb" type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+    <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0"/>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#grain-filter)"/>
+</svg>
+
+<div class="orbs">
+  <div class="orb orb-1" data-mult="1"></div>
+  <div class="orb orb-2" data-mult="0.6"></div>
+  <div class="orb orb-3" data-mult="0.8"></div>
+</div>
+
+<div class="cursor-glow" id="cursor-glow"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="scroll-bar" id="scroll-bar"></div>
+
+<nav>
+  <a href="#" class="logo"><span class="logo-mark"></span>Sylven</a>
+  <a href="https://calendly.com/ryan-sylven/30min" class="nav-cta" data-hover>Book a Call</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow">We build the systems. You run the business.</div>
+  <h1 class="hero-headline">
+    <div class="hero-line-1">AI automation</div>
+    <div class="hero-line-2"><span class="ca-wrap" id="ca-text" data-text="Give your team their time back.">Give your team their time back.</span></div>
+  </h1>
+  <p class="hero-sub">We turn your team's most repetitive tasks into automated systems.</p>
+  <a href="https://calendly.com/ryan-sylven/30min" class="hero-cta" data-hover>
+    Book a Free Call
+    <span class="arrow">→</span>
+  </a>
+</section>
+
+<!-- TOOLS STRIP -->
+<div class="tools-strip">
+  <div class="tools-label">Built With</div>
+  <div class="tools-list">
+    <!-- n8n: 4-node S-curve workflow graph -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 36 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 11 C10.5 11 11 4.5 14 4.5 C17 4.5 17.5 17.5 20.5 17.5 C23.5 17.5 24 11 26.5 11" /><circle cx="4.5" cy="11" r="3.5"/><circle cx="14" cy="4.5" r="3.5"/><circle cx="20.5" cy="17.5" r="3.5"/><circle cx="30" cy="11" r="3.5"/></svg></span>n8n</span>
+    <!-- Make: three tilted rectangles -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="7" width="5" height="13" rx="1.5" fill="currentColor" transform="rotate(-20 3.5 7)"/><rect x="9.5" y="5.5" width="5" height="13" rx="1.5" fill="currentColor" transform="rotate(-20 9.5 5.5)"/><rect x="15.5" y="4" width="5" height="13" rx="1.5" fill="currentColor" transform="rotate(-20 15.5 4)"/></svg></span>Make</span>
+    <!-- Zapier: 8-pointed asterisk with rounded square hole -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2 L13.6 9.2 L19.1 4.9 L14.8 10.4 L22 12 L14.8 13.6 L19.1 19.1 L13.6 14.8 L12 22 L10.4 14.8 L4.9 19.1 L9.2 13.6 L2 12 L9.2 10.4 L4.9 4.9 L10.4 9.2 Z"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.2" fill="#080808"/></svg></span>Zapier</span>
+    <!-- OpenAI: 3 overlapping ellipses at 60° — woven knot -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" xmlns="http://www.w3.org/2000/svg"><g transform="translate(12,12)"><ellipse rx="3.6" ry="8.8"/><ellipse rx="3.6" ry="8.8" transform="rotate(60)"/><ellipse rx="3.6" ry="8.8" transform="rotate(120)"/></g></svg></span>OpenAI</span>
+    <!-- Apify: two upward triangles + one downward forming W -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 26 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><polygon points="1,19 7,5 13,19" opacity="0.6"/><polygon points="13,19 19,5 25,19" opacity="0.9"/><polygon points="7,19 13,8 19,19" opacity="1"/></svg></span>Apify</span>
+    <!-- Claude: thin multi-spoke asterisk -->
+    <span class="tool"><span class="mark"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><g transform="translate(12,12)"><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(0)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(30)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(60)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(90)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(120)"/><rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" transform="rotate(150)"/></g></svg></span>Claude</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section>
+  <div class="container">
+    <div class="section-title-row reveal">
+      <div>
+        <div class="section-eyebrow">The Process</div>
+        <h2 class="section-title">How it works.</h2>
+      </div>
+      <div class="right">Three steps. We build in tools you already use. You own everything.</div>
+    </div>
+
+    <div class="features-grid">
+      <!-- CARD 1: Audit -->
+      <div class="feature-card reveal">
+        <div class="shimmer"></div>
+        <div class="card-canvas">
+          <div class="audit-stage">
+            <div class="audit-frame">
+              <div class="audit-list" id="audit-list">
+                <div class="audit-row"><span class="left"><span class="check"></span>Client Reporting</span><span class="hours">6.4h / wk</span></div>
+                <div class="audit-row"><span class="left"><span class="check"></span>Data Entry</span><span class="hours">8.1h / wk</span></div>
+                <div class="audit-row"><span class="left"><span class="check"></span>Lead Sourcing</span><span class="hours">4.7h / wk</span></div>
+                <div class="audit-row"><span class="left"><span class="check"></span>Reconciliation</span><span class="hours">5.3h / wk</span></div>
+                <div class="audit-row"><span class="left"><span class="check"></span>CRM Updates</span><span class="hours">3.2h / wk</span></div>
+                <div class="audit-scanner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta"><span>WHAT WE FIND</span><span class="live">LIVE SCAN</span></div>
+          <h3 class="card-title">The Audit.</h3>
+          <p class="card-desc">30 minutes. We map every repetitive task your team does manually each week.</p>
+        </div>
+      </div>
+
+      <!-- CARD 2: Telemetry -->
+      <div class="feature-card reveal">
+        <div class="shimmer"></div>
+        <div class="card-canvas">
+          <div class="term">
+            <div class="term-bar">
+              <span class="dots"><span></span><span></span><span></span></span>
+              <span>build_log.txt</span>
+            </div>
+            <div class="term-body" id="term-body"></div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta"><span>WHAT WE BUILD</span><span class="live">BUILD LOG</span></div>
+          <h3 class="card-title">The Build.</h3>
+          <p class="card-desc">Custom workflows built in the tools you already use. Connected, tested, and handed off.</p>
+        </div>
+      </div>
+
+      <!-- CARD 3: Scheduler -->
+      <div class="feature-card reveal">
+        <div class="shimmer"></div>
+        <div class="card-canvas">
+          <div class="sched">
+            <div class="sched-bar"><span>Delivery Schedule</span><span class="week" id="sched-week">Wk 14</span></div>
+            <div class="sched-grid" id="sched-grid">
+              <div class="sched-day">M</div><div class="sched-day">T</div><div class="sched-day">W</div><div class="sched-day">T</div><div class="sched-day">F</div><div class="sched-day">S</div><div class="sched-day">S</div>
+              <!-- 21 cells will be filled -->
+              <div class="fake-cursor" id="fake-cursor">
+                <svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 1 L1 11 L4 8 L6 13 L8 12 L6 7 L11 7 Z" fill="#E8D5B0" stroke="#0a0a0a" stroke-width="0.5"/></svg>
+              </div>
+            </div>
+            <div class="sched-foot">
+              <span class="sched-status" id="sched-status">Reviewing output...</span>
+              <button class="sched-btn" id="sched-btn" data-hover>Approve + Pay</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta"><span>WHAT YOU APPROVE</span><span class="live">RESULTS GATE</span></div>
+          <h3 class="card-title">The Guarantee.</h3>
+          <p class="card-desc">You approve the output before anything moves forward. No surprises.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+<!-- PROTOCOL -->
+<section class="protocol-section">
+  <div class="container">
+    <div class="section-title-row reveal">
+      <div>
+        <div class="section-eyebrow">The Protocol</div>
+        <h2 class="section-title">Three steps. <br/>No surprises.</h2>
+      </div>
+      <div class="right">A repeatable process refined over dozens of automations. We move fast because we have done this before.</div>
+    </div>
+
+    <div class="protocol-stack" id="protocol-stack">
+
+      <div class="stack-card">
+        <div class="stack-content">
+          <div>
+            <div class="stack-step"><span class="num">01</span><span>FIND</span></div>
+            <h3 class="stack-title">Find the bottleneck.</h3>
+            <p class="stack-desc">One call. We identify exactly what is eating your team's time and whether automation can fix it.</p>
+          </div>
+          <div class="stack-foot">
+            <span>Duration · 30 min</span>
+            <span class="badge">Free</span>
+          </div>
+        </div>
+        <div class="stack-canvas"><canvas id="canvas-01"></canvas></div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-content">
+          <div>
+            <div class="stack-step"><span class="num">02</span><span>BUILD</span></div>
+            <h3 class="stack-title">We build it.</h3>
+            <p class="stack-desc">Custom workflows built in n8n, Make, or Zapier — connected to the tools your team already uses. Handed off and running.</p>
+          </div>
+          <div class="stack-foot">
+            <span>Timeline · Days</span>
+            <span class="badge">Yours to keep</span>
+          </div>
+        </div>
+        <div class="stack-canvas"><canvas id="canvas-02"></canvas></div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-content">
+          <div>
+            <div class="stack-step"><span class="num">03</span><span>PROVE</span></div>
+            <h3 class="stack-title">You approve before anything ships.</h3>
+            <p class="stack-desc">The output is yours to review. You decide when it is ready. Nothing moves forward without your sign-off.</p>
+          </div>
+          <div class="stack-foot">
+            <span>Handoff · Your tools</span>
+            <span class="badge">You own it</span>
+          </div>
+        </div>
+        <div class="stack-canvas"><canvas id="canvas-03"></canvas></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BIG CTA -->
+<section class="big-cta">
+  <div class="cta-prompt"><span class="cta-prompt-text">READY?</span><span class="cta-caret"></span></div>
+  <h2 class="big-cta-title reveal">Let's find your <br/>bottleneck.</h2>
+  <p class="big-cta-sub reveal">30 minutes. You tell us what is eating your team's time. We tell you if we can fix it.</p>
+  <a href="https://calendly.com/ryan-sylven/30min" class="hero-cta" data-hover>
+    Book a Free Call
+    <span class="arrow">→</span>
+  </a>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">Sylven<span class="footer-pulse"></span></div>
+      <p class="footer-tag">Give your team their time back.</p>
+    </div>
+    <div class="footer-block">
+      <h4>Status</h4>
+      <p class="status">Systems Operational</p>
+    </div>
+    <div class="footer-block">
+      <h4>Contact</h4>
+      <p><a href="https://calendly.com/ryan-sylven/30min" data-hover>Book a Call →</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SYLVEN</span>
+    <span id="footer-time">—</span>
+  </div>
+</footer>
+
+<script>
+/* =================== GRAIN ANIMATION =================== */
+const turb = document.getElementById('grain-turb');
+let grainTick = 0;
+setInterval(() => {
+  grainTick = (grainTick + 1) % 1000;
+  turb.setAttribute('seed', grainTick);
+}, 80);
+
+/* =================== CURSOR =================== */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+const glow = document.getElementById('cursor-glow');
+let mx = innerWidth/2, my = innerHeight/2;
+let dx = mx, dy = my, rx = mx, ry = my, gx = mx, gy = my;
+addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function tickCursor(){
+  dx += (mx - dx) * 0.5;
+  dy += (my - dy) * 0.5;
+  rx += (mx - rx) * 0.06;
+  ry += (my - ry) * 0.06;
+  gx += (mx - gx) * 0.04;
+  gy += (my - gy) * 0.04;
+  dot.style.transform  = `translate3d(${dx}px,${dy}px,0)`;
+  ring.style.transform = `translate3d(${rx}px,${ry}px,0)`;
+  glow.style.transform = `translate3d(${gx}px,${gy}px,0)`;
+  requestAnimationFrame(tickCursor);
+}
+tickCursor();
+document.querySelectorAll('a, button, [data-hover]').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+});
+
+/* =================== SCROLL BAR =================== */
+const bar = document.getElementById('scroll-bar');
+addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  bar.style.width = (scrollY / max * 100) + '%';
+});
+
+/* =================== ORB PARALLAX =================== */
+const orbs = document.querySelectorAll('.orb');
+let ox = 0, oy = 0;
+function tickOrbs(){
+  ox += ((mx - innerWidth/2)/innerWidth*14 - ox) * 0.04;
+  oy += ((my - innerHeight/2)/innerHeight*14 - oy) * 0.04;
+  orbs.forEach(o => {
+    const m = parseFloat(o.dataset.mult);
+    o.style.marginLeft = (ox * m) + 'px';
+    o.style.marginTop  = (oy * m) + 'px';
+  });
+  requestAnimationFrame(tickOrbs);
+}
+tickOrbs();
+
+/* =================== HERO JITTER =================== */
+const ca = document.getElementById('ca-text');
+function scheduleJitter(){
+  const wait = 5000 + Math.random()*4000;
+  setTimeout(() => {
+    ca.classList.add('jitter');
+    setTimeout(() => ca.classList.remove('jitter'), 80);
+    scheduleJitter();
+  }, wait);
+}
+scheduleJitter();
+
+/* =================== REVEAL =================== */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* =================== CARD 1: AUDIT =================== */
+const auditRows = document.querySelectorAll('#audit-list .audit-row');
+let auditIdx = 0;
+function tickAudit(){
+  auditRows.forEach((r,i) => r.classList.toggle('active', i === auditIdx));
+  auditIdx = (auditIdx + 1) % auditRows.length;
+}
+tickAudit();
+setInterval(tickAudit, 1600);
+
+/* =================== CARD 2: TELEMETRY =================== */
+const termBody = document.getElementById('term-body');
+const termLines = [
+  "Connecting CRM to reporting pipeline...",
+  "Automating weekly client report for 5 accounts...",
+  "Candidate data synced from 3 job boards...",
+  "Reconciliation workflow deployed...",
+  "Trigger set: runs every Monday 7am...",
+  "Build complete. Handing off."
+];
+let termI = 0, charI = 0;
+const MAX_LINES = 6;
+function timeStamp(){
+  const d = new Date();
+  return `[${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}]`;
+}
+function newLine(){
+  const div = document.createElement('div');
+  div.className = 'term-line fresh';
+  div.innerHTML = `<span class="ts">${timeStamp()}</span><span class="text"></span><span class="caret"></span>`;
+  termBody.appendChild(div);
+  while (termBody.children.length > MAX_LINES) {
+    termBody.removeChild(termBody.firstChild);
+  }
+  // de-fresh older
+  [...termBody.children].forEach((c,i,arr) => {
+    if (i < arr.length - 1) c.classList.remove('fresh');
+    const caret = c.querySelector('.caret');
+    if (caret && i < arr.length - 1) caret.remove();
+  });
+  return div.querySelector('.text');
+}
+let curEl = newLine();
+function tickType(){
+  const line = termLines[termI];
+  if (charI <= line.length) {
+    curEl.textContent = line.slice(0, charI);
+    charI++;
+    setTimeout(tickType, 28 + Math.random()*30);
+  } else {
+    setTimeout(() => {
+      termI = (termI + 1) % termLines.length;
+      charI = 0;
+      curEl = newLine();
+      tickType();
+    }, 1200);
+  }
+}
+tickType();
+
+/* =================== CARD 3: SCHEDULER =================== */
+const grid = document.getElementById('sched-grid');
+const cells = [];
+for (let i = 0; i < 21; i++) {
+  const c = document.createElement('div');
+  c.className = 'sched-cell';
+  grid.appendChild(c);
+  cells.push(c);
+}
+const cursor = document.getElementById('fake-cursor');
+const status = document.getElementById('sched-status');
+const btn = document.getElementById('sched-btn');
+const wk = document.getElementById('sched-week');
+
+function delay(ms){ return new Promise(r => setTimeout(r, ms)); }
+let weekNum = 14;
+async function schedLoop(){
+  while (true) {
+    cells.forEach(c => c.classList.remove('done','scanning'));
+    btn.classList.remove('armed');
+    status.textContent = 'Reviewing output...';
+    status.classList.remove('ready');
+    cursor.style.opacity = '0';
+    await delay(800);
+    // scan each cell
+    for (let i = 0; i < cells.length; i++) {
+      const r = cells[i].getBoundingClientRect();
+      const gridR = grid.getBoundingClientRect();
+      cursor.style.opacity = '1';
+      cursor.style.transform = `translate(${r.left - gridR.left + r.width/2 - 7}px, ${r.top - gridR.top + r.height/2 - 7}px)`;
+      cells[i].classList.add('scanning');
+      await delay(180);
+      cells[i].classList.remove('scanning');
+      cells[i].classList.add('done');
+    }
+    // move to button
+    status.textContent = 'Output verified.';
+    status.classList.add('ready');
+    await delay(400);
+    const br = btn.getBoundingClientRect();
+    const gr = grid.getBoundingClientRect();
+    cursor.style.transform = `translate(${br.left - gr.left + 20}px, ${br.top - gr.top + 50}px)`;
+    await delay(800);
+    btn.classList.add('armed');
+    await delay(2200);
+    weekNum++;
+    wk.textContent = 'Wk ' + weekNum;
+  }
+}
+setTimeout(schedLoop, 800);
+
+/* =================== PROTOCOL CANVASES =================== */
+function setupCanvas(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext('2d');
+  function resize(){
+    const r = c.getBoundingClientRect();
+    c.width = r.width * devicePixelRatio;
+    c.height = r.height * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+  }
+  resize();
+  addEventListener('resize', resize);
+  return { c, ctx, w: () => c.width / devicePixelRatio, h: () => c.height / devicePixelRatio };
+}
+
+// 01 — Concentric scanning circles
+const c1 = setupCanvas('canvas-01');
+let t1 = 0;
+function draw1(){
+  const { ctx } = c1; const w = c1.w(), h = c1.h();
+  ctx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2;
+  ctx.strokeStyle = 'rgba(232,213,176,0.2)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 8; i++){
+    const baseR = 30 + i * 30;
+    const r = baseR + Math.sin(t1*0.001 + i) * 6;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.globalAlpha = 0.2 + Math.sin(t1*0.001 + i*0.3)*0.15;
+    ctx.stroke();
+  }
+  // rotating sweep
+  ctx.globalAlpha = 1;
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(t1 * 0.0005);
+  const grad = ctx.createLinearGradient(0,0,260,0);
+  grad.addColorStop(0,'rgba(232,213,176,0)');
+  grad.addColorStop(1,'rgba(232,213,176,0.5)');
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0,0); ctx.lineTo(260,0); ctx.stroke();
+  ctx.restore();
+  // crosshair
+  ctx.strokeStyle = 'rgba(232,213,176,0.4)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx-8,cy); ctx.lineTo(cx+8,cy);
+  ctx.moveTo(cx,cy-8); ctx.lineTo(cx,cy+8);
+  ctx.stroke();
+  // center dot
+  ctx.fillStyle = '#E8D5B0';
+  ctx.beginPath(); ctx.arc(cx,cy,2,0,Math.PI*2); ctx.fill();
+  t1 += 16;
+  requestAnimationFrame(draw1);
+}
+draw1();
+
+// 02 — laser scan over node grid
+const c2 = setupCanvas('canvas-02');
+let t2 = 0;
+function draw2(){
+  const { ctx } = c2; const w = c2.w(), h = c2.h();
+  ctx.clearRect(0,0,w,h);
+  const cols = 8, rows = 6;
+  const padX = w*0.1, padY = h*0.15;
+  const stepX = (w - padX*2) / (cols - 1);
+  const stepY = (h - padY*2) / (rows - 1);
+  // grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < cols; i++) {
+    ctx.beginPath();
+    ctx.moveTo(padX + i*stepX, padY);
+    ctx.lineTo(padX + i*stepX, h - padY);
+    ctx.stroke();
+  }
+  for (let j = 0; j < rows; j++) {
+    ctx.beginPath();
+    ctx.moveTo(padX, padY + j*stepY);
+    ctx.lineTo(w - padX, padY + j*stepY);
+    ctx.stroke();
+  }
+  // laser line position
+  const period = 4000;
+  const phase = (t2 % period) / period;
+  const laserX = padX + phase * (w - padX*2);
+  // nodes
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      const x = padX + i*stepX, y = padY + j*stepY;
+      const dist = Math.abs(x - laserX);
+      const lit = Math.max(0, 1 - dist / 40);
+      const passed = x < laserX;
+      ctx.beginPath();
+      ctx.arc(x, y, 2 + lit*2, 0, Math.PI*2);
+      if (passed || lit > 0.05) {
+        ctx.fillStyle = `rgba(232,213,176,${0.4 + lit*0.6})`;
+        ctx.shadowColor = '#E8D5B0';
+        ctx.shadowBlur = lit * 12;
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.shadowBlur = 0;
+      }
+      ctx.fill();
+    }
+  }
+  ctx.shadowBlur = 0;
+  // laser
+  const grad = ctx.createLinearGradient(laserX, 0, laserX, h);
+  grad.addColorStop(0, 'rgba(232,213,176,0)');
+  grad.addColorStop(0.5, 'rgba(232,213,176,0.7)');
+  grad.addColorStop(1, 'rgba(232,213,176,0)');
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#E8D5B0'; ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.moveTo(laserX, 0); ctx.lineTo(laserX, h);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  t2 += 16;
+  requestAnimationFrame(draw2);
+}
+draw2();
+
+// 03 — EKG waveform
+const c3 = setupCanvas('canvas-03');
+let t3 = 0;
+const ekgPoints = [];
+function draw3(){
+  const { ctx } = c3; const w = c3.w(), h = c3.h();
+  ctx.clearRect(0,0,w,h);
+  const baseY = h/2;
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 24) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 24) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+  // generate next point
+  const phase = (t3 / 16) % 90;
+  let v = 0;
+  if (phase < 6) v = Math.sin(phase) * 4;            // baseline
+  else if (phase < 14) v = -8;                        // P wave
+  else if (phase < 18) v = -60 - (phase-14)*15;      // Q dip... we'll spike up
+  else if (phase < 22) v = 80 - (phase-18)*30;       // big spike
+  else if (phase < 30) v = -20 + (phase-22)*3;       // S
+  else v = Math.sin(phase*0.3) * 3;
+  ekgPoints.push(v);
+  if (ekgPoints.length > w) ekgPoints.shift();
+  // draw line
+  ctx.strokeStyle = '#E8D5B0';
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#E8D5B0'; ctx.shadowBlur = 8;
+  ctx.beginPath();
+  for (let i = 0; i < ekgPoints.length; i++) {
+    const x = i;
+    const y = baseY + ekgPoints[i];
+    if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  // leading dot
+  if (ekgPoints.length > 0) {
+    const lx = ekgPoints.length - 1;
+    const ly = baseY + ekgPoints[ekgPoints.length-1];
+    ctx.fillStyle = '#E8D5B0';
+    ctx.shadowColor = '#E8D5B0'; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(lx, ly, 3, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  t3 += 16;
+  requestAnimationFrame(draw3);
+}
+draw3();
+
+/* =================== FOOTER CLOCK =================== */
+function updateClock(){
+  const d = new Date();
+  const t = d.toLocaleTimeString('en-US', { hour12: false, timeZone: 'UTC' }) + ' UTC';
+  document.getElementById('footer-time').textContent = t;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+</script>
+</body>
+</html>
