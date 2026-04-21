@@ -784,6 +784,72 @@
   /* Reveal */
   .reveal { opacity: 0; transform: translateY(20px); transition: opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); }
   .reveal.in { opacity: 1; transform: none; }
+
+  /* ========= TOUCH / MOBILE CURSOR FIX ========= */
+  @media (pointer: coarse) {
+    .cursor-dot, .cursor-ring, .cursor-glow { display: none !important; }
+    body { cursor: auto; }
+    a { cursor: pointer; }
+    button { cursor: pointer; }
+  }
+
+  /* ========= MOBILE LAYOUT (max-width: 768px) ========= */
+  @media (max-width: 768px) {
+    nav {
+      padding: 14px 20px;
+    }
+    .logo { font-size: 20px; }
+    .nav-cta { font-size: 12px; padding: 8px 14px; }
+
+    .hero {
+      padding: 100px 20px 60px;
+      min-height: auto;
+    }
+    .hero-sub { max-width: 100%; font-size: 15px; }
+    .hero-cta { padding: 14px 22px; font-size: 13px; }
+    .hero-meta {
+      flex-wrap: wrap; gap: 14px; justify-content: center;
+    }
+    .eyebrow { font-size: 11px; padding: 7px 14px; }
+
+    .tools-strip { padding: 48px 20px; }
+
+    section { padding: 72px 20px; }
+    .section-title-row { margin-bottom: 40px; gap: 16px; }
+    .section-title-row .right { max-width: 100%; font-size: 13px; }
+
+    .feature-card { min-height: 420px; }
+    .card-body { padding: 20px 20px 24px; }
+    .card-title { font-size: 32px; }
+
+    .protocol-section { padding: 60px 20px 0; }
+    .stack-card { min-height: auto; }
+    .stack-content { padding: 32px 24px; }
+    .stack-step .num { font-size: 40px; }
+    .stack-title { margin: 16px 0 14px; }
+    .stack-desc { font-size: 15px; max-width: 100%; }
+    .stack-foot { font-size: 10px; }
+
+    .big-cta { padding: 100px 20px; }
+    .big-cta-sub { font-size: 16px; }
+    .cta-handoff { font-size: 9px; letter-spacing: 0.2em; }
+
+    footer { padding: 56px 20px 28px; }
+    .footer-brand { font-size: 40px; }
+    .footer-grid { gap: 32px; }
+    .footer-bottom {
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+    }
+  }
+
+  /* ========= EXTRA SMALL (max-width: 400px) ========= */
+  @media (max-width: 400px) {
+    .hero-line-2 { font-size: clamp(60px, 18vw, 80px); }
+    .section-title { font-size: clamp(40px, 11vw, 64px); }
+    .big-cta-title { font-size: clamp(48px, 13vw, 80px); }
+  }
 </style>
 </head>
 <body>
@@ -960,7 +1026,7 @@
           <div>
             <div class="stack-step"><span class="num">02</span><span>BUILD</span></div>
             <h3 class="stack-title">We build it.</h3>
-            <p class="stack-desc">Custom workflows built in n8n, Make, or Zapier — connected to the tools your team already uses. Handed off and running.</p>
+            <p class="stack-desc">Custom workflows built in n8n, Make, or Zapier, connected to the tools your team already uses. Handed off and running.</p>
           </div>
           <div class="stack-foot">
             <span>Timeline · Days</span>
@@ -1033,29 +1099,31 @@ setInterval(() => {
 }, 80);
 
 /* =================== CURSOR =================== */
-const dot = document.getElementById('cursor-dot');
-const ring = document.getElementById('cursor-ring');
-const glow = document.getElementById('cursor-glow');
-let mx = innerWidth/2, my = innerHeight/2;
-let dx = mx, dy = my, rx = mx, ry = my, gx = mx, gy = my;
-addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-function tickCursor(){
-  dx += (mx - dx) * 0.5;
-  dy += (my - dy) * 0.5;
-  rx += (mx - rx) * 0.06;
-  ry += (my - ry) * 0.06;
-  gx += (mx - gx) * 0.04;
-  gy += (my - gy) * 0.04;
-  dot.style.transform  = `translate3d(${dx}px,${dy}px,0)`;
-  ring.style.transform = `translate3d(${rx}px,${ry}px,0)`;
-  glow.style.transform = `translate3d(${gx}px,${gy}px,0)`;
-  requestAnimationFrame(tickCursor);
+if (window.matchMedia('(pointer: fine)').matches) {
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  const glow = document.getElementById('cursor-glow');
+  let mx = innerWidth/2, my = innerHeight/2;
+  let dx = mx, dy = my, rx = mx, ry = my, gx = mx, gy = my;
+  addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function tickCursor(){
+    dx += (mx - dx) * 0.5;
+    dy += (my - dy) * 0.5;
+    rx += (mx - rx) * 0.06;
+    ry += (my - ry) * 0.06;
+    gx += (mx - gx) * 0.04;
+    gy += (my - gy) * 0.04;
+    dot.style.transform  = `translate3d(${dx}px,${dy}px,0)`;
+    ring.style.transform = `translate3d(${rx}px,${ry}px,0)`;
+    glow.style.transform = `translate3d(${gx}px,${gy}px,0)`;
+    requestAnimationFrame(tickCursor);
+  }
+  tickCursor();
+  document.querySelectorAll('a, button, [data-hover]').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+  });
 }
-tickCursor();
-document.querySelectorAll('a, button, [data-hover]').forEach(el => {
-  el.addEventListener('mouseenter', () => ring.classList.add('hover'));
-  el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
-});
 
 /* =================== SCROLL BAR =================== */
 const bar = document.getElementById('scroll-bar');
