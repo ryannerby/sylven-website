@@ -1041,11 +1041,11 @@ setInterval(() => {
 }, 80);
 
 /* =================== CURSOR =================== */
+let mx = innerWidth/2, my = innerHeight/2;
 if (window.matchMedia('(pointer: fine)').matches) {
   const dot = document.getElementById('cursor-dot');
   const ring = document.getElementById('cursor-ring');
   const glow = document.getElementById('cursor-glow');
-  let mx = innerWidth/2, my = innerHeight/2;
   let dx = mx, dy = my, rx = mx, ry = my, gx = mx, gy = my;
   addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
   function tickCursor(){
